@@ -15,7 +15,7 @@ def property_details(url_page):
         soup = BeautifulSoup(page, 'html.parser')
         ficha_tecnica = soup.find_all(class_='ficha-tecnica')
         amenities = soup.find_all(id='amenities')
-        description = soup.find_all(id='descripcion')
+        description = soup.find(id='descripcion')
         agency = soup.find('p', class_='titulo-inmobiliaria')
         price = soup.find('p', class_='precio-final')
         title = soup.find('h1', class_='likeh2 titulo one-line-txt')
@@ -26,7 +26,7 @@ def property_details(url_page):
                    for item in ficha_tecnica[0].find_all(class_='lista')} if ficha_tecnica else {}
         details['extra'] = ','.join(
             [key.find('p').get_text() for key in amenities[0].find_all(class_='lista active')]) if amenities else ''
-        details['description'] = description[0].find('p').get_text() if description else ''
+        details['description'] = '. '.join([p.get_text() for p in description.find_all('p')]) if description else ''
         details['uri'] = url_page
         details['agency'] = agency.get_text() if agency else ''
         details['price'] = price.get_text() if price else ''
@@ -48,7 +48,7 @@ if __name__ == '__main__':
     result = []
 
     with Pool(NCORES) as p:
-        result = p.map(property_details, df.loc[:, 'uris'].values)
+        result = p.map(property_details, df.loc[:8, 'uris'].values)
 
     df_result = reduce(lambda x, y: pd.concat([x, y], axis=1, sort=True), result).transpose().reset_index(drop=True)
     df_result.to_csv(output_file, index=False)
