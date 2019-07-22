@@ -1,3 +1,4 @@
+from datetime import datetime
 from functools import reduce
 import logging
 from multiprocessing import cpu_count
@@ -13,9 +14,9 @@ NCORES = cpu_count()
 logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.DEBUG)
 
 
-def retrive_general_data(url_page):
+def retrieve_general_data(url_page):
     logging.debug('%s', url_page)
-
+    url_base = url_page.rsplit('/')[0]
     try:
         page = urllib.request.urlopen(url_page)
     except urllib.error.HTTPError as e:
@@ -28,18 +29,18 @@ def retrive_general_data(url_page):
     soup = BeautifulSoup(page, 'html.parser')
     table = soup.find_all('div', attrs={'class': 'propiedades-slider'})
     neighborhood = [
-        [k.text for k in p.find_all('p')] for t in table \
-        for p in t.find_all('div') \
+        [k.text for k in p.find_all('p')] for t in table
+        for p in t.find_all('div')
         if 'singleLineDots' in p['class']
     ]
-    price = [p.text.split()[-1] for t in table \
+    price = [p.text.split()[-1] for t in table
              for p in t.find_all('div') if 'precio' in p['class']]
-    desc = [[k.text for k in p.find_all('p')] for t in table \
+    desc = [[k.text for k in p.find_all('p')] for t in table
             for p in t.find_all('div') if
             'inDescription' in p['class']]
     desc = [k[0] for k in desc]
-    details = [[d.find_all('span')[0].text for d in p.find_all('div')] \
-               for t in table for p in t.find_all('div') \
+    details = [[d.find_all('span')[0].text for d in p.find_all('div')]
+               for t in table for p in t.find_all('div')
                if 'contentIcons' in p['class']]
     details = pd.DataFrame(details,
                            columns=['rooms', 'bathrooms', 'area_m2'])
@@ -62,7 +63,8 @@ def retrive_general_data(url_page):
 
     return df
 
-def property_details(url_page):
+
+def retrieve_property_details(url_page):
     logging.debug('%s', url_page)
     try:
         page = urllib.request.urlopen(url_page)
@@ -96,24 +98,64 @@ def property_details(url_page):
     return pd.Series(details)
 
 
-def get_with_pool(urls, outputfile):
+def pool_property_details(urls, outputfile):
     # result = []
 
     with Pool(NCORES) as p:
-        result = [p.apply_async(property_details, (url, )) for url in urls]
-        # result = p.map(property_details, urls)
+        result = [p.apply_async(retrieve_property_details, (url,))
+                  for url in urls]
         result = [k.get() for k in result]
 
-    df_result = reduce(lambda x, y: pd.concat([x, y], axis=1, sort=True), result).transpose().reset_index(drop=True)
+    df_result = reduce(lambda x, y: pd.concat([x, y], axis=1, sort=True),
+                       result).transpose().reset_index(drop=True)
     df_result.to_csv(outputfile, index=False)
 
 
+def pool_general_data(urls, outputfile):
+    with Pool(NCORES) as p:
+        result = [p.apply_async(retrieve_general_data, (url,)) for url in urls]
+        result = [k.get() for k in result]
+
+    df_result = reduce(lambda x, y: pd.concat([x, y], axis=0, sort=True),
+                       result).reset_index(drop=True)
+    df_result.to_csv(outputfile, index=False)
+
+
+def generate_raw_dataset():
+    basepath = os.path.dirname(os.path.realpath(__file__))
+    output_path = os.path.join(
+        os.sep.join(basepath.split(os.sep)[:-1]), 'data/raw/')
+    suffix = datetime.today().strftime('%Y-%m-%d')
+    output_file = 'raw_home_for_sale_dataset_{}'.format(suffix)
+
+    tmp_path = os.path.join(output_path, 'details_rent/')
+    output_file_tmp = tmp_path + output_file + '_{idx}.csv'
+
+    if not os.path.exists(tmp_path):
+        os.mkdir(tmp_path)
+
+    for idx, subset in enumerate(np.array_split(np.arange(945), 100)):
+        output_file = output_file_tmp.format(name=output_file_tmp, idx=idx)
+        web_page = 'https://www.infocasas.com.uy/venta/inmuebles/montevideo/pagina{}'
+        urls = [web_page.format(k) for k in subset]
+        pool_general_data(urls, output_file)
+
+    dfs = [pd.read_csv(tmp_path+key) for key in os.listdir(tmp_path)]
+    output = reduce(lambda x, y: pd.concat([x, y], sort=True), dfs)
+    output.to_csv(output_path + output_file + '.csv', index=False)
+
+    return
+
+
+def generate_raw_datails_dataset():
+    pass
+
 if __name__ == '__main__':
 
-    basepath = '/home/cesar/software/houses-project/data/'
-    input_file = 'raw_rent_house_dataset_2019-07-09 11:24:55.766324.csv'
-    output_file_base = 'details_rent_house_dataset_2019-07-09 11:24:55.766324'
-    tmp_path = basepath + 'datails/'
+    basepath = '/home/cesar/software/houses-project/data/raw/'
+    input_file = 'raw_home_for_sale_dataset_2019-07-14.csv'
+    output_file_base = 'raw_details_home_for_sale_dataset_2019-07-14'
+    tmp_path = basepath + 'details_raw/'
 
     csv_path = basepath + input_file
     output_file_tmp = tmp_path + '{name}_{idx}.csv'
@@ -122,11 +164,11 @@ if __name__ == '__main__':
         os.mkdir(tmp_path)
 
     df = pd.read_csv(csv_path)
-
-    for idx, subset in enumerate(np.array_split(df.index.values, 1000)[:2]):
+    
+    for idx, subset in enumerate(np.array_split(df.index.values, 100)):
         output_file = output_file_tmp.format(name=output_file_base, idx=idx)
-        get_with_pool(df.loc[subset, 'uris'].values, output_file)
+        pool_property_details(df.loc[subset, 'uris'].values, output_file)
 
-    dfs = [pd.read_csv(tmp_path+key) for key in os.listdir(tmp_path) if output_file_base in key]
+    dfs = [pd.read_csv(tmp_path+key) for key in os.listdir(tmp_path)]
     output = reduce(lambda x, y: pd.concat([x, y], sort=True), dfs)
-    output.to_csv(basepath+'test.csv', index=False)
+    output.to_csv(basepath + output_file_base + '.csv', index=False)
