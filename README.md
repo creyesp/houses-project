@@ -2,3 +2,7 @@
 
 # Data science woorkshop
 Analysis of Uruguan houses sale
+
+
+Notes:
+- https://www.kdnuggets.com/2019/06/7-steps-mastering-data-preparation-python.html
