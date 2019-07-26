@@ -55,3 +55,32 @@ Log or exp tranformation to convert a non-lineal variable to a linear variable
 
 
 acquiring data -> feature engineering-> EDA	->
+
+
+
+
+
+#############################################
+Good practices:
+	Write reusable Class/funtion 
+	Be structurated
+
+
+preprocesing
+	load some data
+	split data into train/test set
+	drop some features
+	'Clean' some features
+	Engenering some features
+	Apply One-Hot-Enciding to categorical features
+	scale/transfrom 
+
+
+Feature engenering 
+	tranformation 
+	normalization 
+	standarization
+
+
+sklearn 
+	FeatureUnion

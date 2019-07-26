@@ -149,7 +149,7 @@ def pool_general_data(urls, outputfile):
 
     df_result = reduce(lambda x, y: pd.concat([x, y], axis=0, sort=True),
                        result).reset_index(drop=True)
-    if not df_result.empty():
+    if not df_result.empty:
         df_result.to_csv(outputfile, index=False)
         is_df_valid = 1
     else:
