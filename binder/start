@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 set -e
-rm -rf data/*.csv
+#rm -rf data/*.csv
 
 exec "$@"
