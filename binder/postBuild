@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -e
-DATASET_FOLDER=data2
+DATASET_FOLDER=data
 #URL_DATASET=https://www.dropbox.com/sh/xfbxcs7w5im3j34/AABUeyTe83uy_lZxoXZcGDuxa?dl=1
 #URL_DATASET_PRE=https://www.dropbox.com/sh/gjfjso2g7dwm0pe/AADjH-HlnsgzJU3ajO8VTCWsa?dl=1
 #URL_DATASET_RAW=https://www.dropbox.com/sh/ivjvn7nkoqfpyvn/AACrw0khExAa8RVl8eWsKhdea?dl=1
