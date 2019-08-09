@@ -8,10 +8,11 @@ DATASET_FOLDER=data2
 URL_DATASET_PRE=https://www.dropbox.com/s/c5uilqy6c3e3wq7/details_home_for_sale_dataset_2019-07-25.csv?dl=0
 URL_DATASET_READY=https://www.dropbox.com/s/r5th9yt91yua7w5/num_dataset_houses.csv?dl=0
 
-mkdir -p $DATASET_FOLDER/preprocessed/
-mkdir -p $DATASET_FOLDER/ready/
+#mkdir -p $DATASET_FOLDER/preprocessed/
+#mkdir -p $DATASET_FOLDER/ready/
+mkdir -p $DATASET_FOLDER
 
-wget -O $DATASET_FOLDER/preprocessed/dataset.csv $URL_DATASET_PRE
-wget -O $DATASET_FOLDER/ready/dataset.csv $URL_DATASET_READY
+wget -O $DATASET_FOLDER/dataset_preprocessed.csv $URL_DATASET_PRE
+wget -O $DATASET_FOLDER/dataset_ready.csv $URL_DATASET_READY
 
 exec "$@"
