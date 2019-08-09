@@ -57,11 +57,11 @@ def clean_dataset(src_file, dst_file):
     df_clean.loc[:, 'plantas'] = df.loc[:, 'plantas'].str.extract('([0-9]+)\.?')[0]
     df_clean.loc[:, 'plantas_extra'] = df.loc[:, 'plantas'].str.lower().str.contains('más')
 
-    df_clean.loc[:, 'price'] = df.loc[:, 'price'].str.extract('([0-9\.]+)')[0].str.replace('.','')
-    df_clean.loc[:, 'price_cur'] = df.loc[:, 'price'].str.extract('([\$|UI|U\$S]+)')
+    df_clean.loc[:, 'precio'] = df.loc[:, 'precio'].str.extract('([0-9\.]+)')[0].str.replace('.','')
+    df_clean.loc[:, 'precio_moneda'] = df.loc[:, 'precio'].str.extract('([\$|UI|U\$S]+)')
 
     df_clean.loc[:, 'gastos_comunes'] = df.loc[:, 'gastos_comunes'].str.extract('([0-9\.]+)')[0].str.replace('.','')
-    df_clean.loc[:, 'gastos_comunes_cur'] = df.loc[:, 'gastos_comunes'].str.extract('([\$|UI|U\$S]+)')
+    df_clean.loc[:, 'gastos_comunes_moneda'] = df.loc[:, 'gastos_comunes'].str.extract('([\$|UI|U\$S]+)')
 
     # FIXME: regex make error when number is 100.0 only work with this format 1.000.000
     dist_mar = df.loc[:, 'distancia_al_mar'].str.extract('([0-9\.?]+)', ).apply(lambda x: x.str.replace('.', ''))
@@ -72,7 +72,7 @@ def clean_dataset(src_file, dst_file):
     # String number to float
     to_numeric = ['ambientes', 'banos', 'garajes', 'ano_de_construccion',
                   'distancia_al_mar', 'dormitorios', 'piso', 'plantas',
-                  'price', 'gastos_comunes', ]
+                  'precio', 'gastos_comunes', ]
     df_to_numeric = df_clean[to_numeric]
     df_clean.loc[:, to_numeric] = df_to_numeric.astype(float)
 

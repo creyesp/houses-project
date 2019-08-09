@@ -121,12 +121,12 @@ def retrieve_property_details(url_page):
                for item in ficha_tecnica[0].find_all(class_='lista')} if ficha_tecnica else {}
     details['extra'] = ','.join(
         [key.find('p').get_text() for key in amenities[0].find_all(class_='lista active')]) if amenities else ''
-    details['description'] = '. '.join([p.get_text() for p in description.find_all('p')]) if description else ''
+    details['descripcion'] = '. '.join([p.get_text() for p in description.find_all('p')]) if description else ''
     details['url'] = url_page
-    details['agency'] = agency.get_text() if agency else ''
-    details['price'] = price.get_text() if price else ''
-    details['title'] = title.get_text() if title else ''
-    details['kind'] = kind.get_text() if kind else ''
+    details['inmobiliaria'] = agency.get_text() if agency else ''
+    details['precio'] = price.get_text() if price else ''
+    details['titulo_publicacion'] = title.get_text() if title else ''
+    details['tipo_propiedad'] = kind.get_text() if kind else ''
 
     return pd.Series(details)
 
