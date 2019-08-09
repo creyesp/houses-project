@@ -1,14 +1,4 @@
 #!/usr/bin/env bash
 set -e
-DATASET_FOLDER=data
-#URL_DATASET=https://www.dropbox.com/sh/xfbxcs7w5im3j34/AABUeyTe83uy_lZxoXZcGDuxa?dl=1
-#URL_DATASET_PRE=https://www.dropbox.com/sh/gjfjso2g7dwm0pe/AADjH-HlnsgzJU3ajO8VTCWsa?dl=1
-#URL_DATASET_RAW=https://www.dropbox.com/sh/ivjvn7nkoqfpyvn/AACrw0khExAa8RVl8eWsKhdea?dl=1
-#URL_DATASET_READY=https://www.dropbox.com/sh/ncda59u6zrjtjji/AADUFeXCHDPUZxnH0xFBeN63a?dl=1
-URL_DATASET_PRE=https://www.dropbox.com/s/c5uilqy6c3e3wq7/details_home_for_sale_dataset_2019-07-25.csv?dl=0
-URL_DATASET_READY=https://www.dropbox.com/s/r5th9yt91yua7w5/num_dataset_houses.csv?dl=0
-
-wget -O $DATASET_FOLDER/preprocessed/dataset.csv $URL_DATASET_PRE
-wget -O $DATASET_FOLDER/ready/dataset.csv $URL_DATASET_READY
 
 exec "$@"
