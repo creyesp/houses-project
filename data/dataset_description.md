@@ -35,7 +35,7 @@ Este dataset describe la información de los campos obtenidos a partid del scrap
 | m2_edificados        | float | area construida |
 | oficina              | bool | si es para uso de oficina o no |
 | penthouse            | bool | si es penthouse o no (lujo) |
-| piso                 | int | puso en el que se encuentra del edificio |
+| ~~piso~~                 | int | piso del apartamente o numero de apartamento |
 | plantas              | int | numero de pisos plantas de la propiedad |
 | plantas_extra        | bool | 3+ plantas |
 | precio                | flaot | precio de la propiedad |
