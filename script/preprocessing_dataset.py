@@ -1,10 +1,6 @@
-from functools import reduce
-import os
 from unidecode import unidecode
 
 import pandas as pd
-import pandas_profiling
-import matplotlib.pyplot as plt
 
 YES_NO_MAP = {'si': 1, 'no': 0}
 
