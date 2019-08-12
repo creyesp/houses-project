@@ -1,4 +1,9 @@
+import matplotlib.pyplot as plt
 import pandas as pd
+from sklearn.metrics import mean_absolute_error
+from sklearn.metrics import mean_squared_error
+from sklearn.metrics import median_absolute_error
+from sklearn.metrics import r2_score
 
 
 def info(data):
@@ -48,20 +53,26 @@ def pareto_rule(data, default='otros'):
 
     return mapped
 
-def plot_predict_result(y_test, y_pred):
-    f, ax = plt.subplots(2)
-    ax[0].scatter(y_test, y_pred)
-    ax[0].plot(ax0.get_xbound(), ax0.get_xbound(), '--k')
+def plot_predict_result(y_test, y_pred, figsize=(10,5), **kwargs):
+    f, ax = plt.subplots(2, figsize=figsize, **kwargs)
+    ax[0].scatter(y_test, y_pred, alpha=0.4)
+    ax[0].plot(ax[0].get_xbound(), ax[0].get_xbound(), '--k')
     ax[0].set(ylabel='Target predicted', xlabel='True Target')
     ax[0].text(1, 9, get_scores(y_test, y_pred))
-    ax[1].hist(y_test - y_pred, bins=100)
-    ax[1].set(ylabel='frequency', xlabel='error')
+    # ax[1].hist(y_test - y_pred, bins=100)
+    # ax[1].set(ylabel='frequency', xlabel='error')
+    ax[1].scatter(y_test, y_test - y_pred, alpha=0.4)
+    ax[1].set(ylabel='residual', xlabel='test price')
 
     return f, ax
 
 def get_scores(test_train, test_predict):
     mse = mean_squared_error(test_train, test_predict)
     mea = mean_absolute_error(test_train, test_predict)
+    meae = median_absolute_error(test_train, test_predict)
     r2 = r2_score(test_train, test_predict)
 
-    return r'MSE={}, MAE={}, $R^2$={:.2f}'.format(mse, mea, r2)
+    return r'MSE={:.2f}, MAE={:.2f}, MEAE={:.2f}, $R^2$={:.2f}'.format(mse,
+                                                               mea,
+                                                               meae,
+                                                               r2)
