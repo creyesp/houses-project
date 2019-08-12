@@ -1,4 +1,6 @@
-Este dataset describe la información de los campos obtenidos a partid del scraping de las propiedad a la venta en Montevideo, Uruguay desde el sitio infocasas.com.uy.
+La siguente tabla describe los campos del dataset usado en el workshop. 
+El dastaset fue obtenido haciendo scraping del sitio web [infocasa](http://www.infocasas.com.uy)
+especificamente para las propiedad en venta de Montevideo, Uruguay.
 
 | Field | Type | Description |
 |---|---|---|
