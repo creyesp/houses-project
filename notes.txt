@@ -59,6 +59,8 @@ acquiring data -> feature engineering-> EDA	->
 
 
 
+Explaning models outcomes
+https://www.kdnuggets.com/2019/08/open-black-boxes-explainable-machine-learning.html
 
 #############################################
 Good practices:
@@ -84,3 +86,5 @@ Feature engenering
 
 sklearn 
 	FeatureUnion
+
+

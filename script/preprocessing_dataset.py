@@ -78,6 +78,14 @@ def clean_dataset(src_file, dst_file):
 
     sorted_col = df_clean.columns.sort_values()
     df_clean[sorted_col].to_csv(output_file, index=False)
+    cat_trans = (df
+                 .drop(columns=['url', 'referencia'])
+                 .select_dtypes(include='O')
+                 .fillna('')
+                 .apply(lambda x: x.str.lower().apply(lambda y: unidecode(y)))
+                 )
+    cat_trans[cat_trans == ''] = None
+    df_clean.loc[:, cat_trans.columns] = cat_trans
 
     return df_clean[sorted_col]
 
