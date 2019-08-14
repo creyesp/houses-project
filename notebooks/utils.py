@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 from sklearn.metrics import mean_absolute_error
 from sklearn.metrics import mean_squared_error
@@ -29,6 +30,7 @@ def info(data):
     }
     return pd.DataFrame(desc)
 
+
 def pareto_rule(data, default='otros'):
     """Implementation of Pareto rule to categorical variable.
 
@@ -53,18 +55,29 @@ def pareto_rule(data, default='otros'):
 
     return mapped
 
-def plot_predict_result(y_test, y_pred, figsize=(10,5), **kwargs):
-    f, ax = plt.subplots(2, figsize=figsize, **kwargs)
+
+def plot_predict_result(y_test, y_pred, **kwargs):
+    if 'figsize' not in kwargs:
+        kwargs['figsize'] = (8, 8)
+
+    f, ax = plt.subplots(2, 2, **kwargs)
+    ax = ax.flatten()
     ax[0].scatter(y_test, y_pred, alpha=0.4)
     ax[0].plot(ax[0].get_xbound(), ax[0].get_xbound(), '--k')
-    ax[0].set(ylabel='Target predicted', xlabel='True Target')
-    ax[0].text(1, 9, get_scores(y_test, y_pred))
-    # ax[1].hist(y_test - y_pred, bins=100)
-    # ax[1].set(ylabel='frequency', xlabel='error')
+    ax[0].set(ylabel='Target predicted',
+              xlabel='True Target',
+              title='test v/s predict price')
     ax[1].scatter(y_test, y_test - y_pred, alpha=0.4)
-    ax[1].set(ylabel='residual', xlabel='test price')
+    ax[1].set(ylabel='residual',
+              xlabel='test price',
+              title='Residual')
+    ax[2].hist(y_test - y_pred, bins=100)
+    ax[2].set(ylabel='frequency',
+              xlabel='residual',
+              title='Residual Distribution')
 
     return f, ax
+
 
 def get_scores(test_train, test_predict):
     mse = mean_squared_error(test_train, test_predict)
