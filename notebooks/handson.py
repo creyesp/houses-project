@@ -80,10 +80,10 @@ def plot_predict_result(y_test, y_pred, **kwargs):
 
 
 def get_scores(test_train, test_predict):
-    mse = mean_squared_error(test_train, test_predict)
+    mse = np.sqrt(mean_squared_error(test_train, test_predict))
     mea = mean_absolute_error(test_train, test_predict)
     meae = median_absolute_error(test_train, test_predict)
     r2 = r2_score(test_train, test_predict)
 
-    return (r'MSE={:.2f}, MAE={:.2f}, MEAE={:.2f}, $R^2$={:.2f}'
+    return (r'RMSE={:.2f}, MAE={:.2f}, MEAE={:.2f}, $R^2$={:.2f}'
             ).format(mse, mea, meae, r2)
