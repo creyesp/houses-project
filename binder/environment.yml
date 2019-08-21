@@ -22,5 +22,5 @@ dependencies:
   - pip:
     - pandas-profiling==2.1.0
     - unidecode==1.1.1
-#    - xgboost==0.90
+    - xgboost==0.90
     - lightgbm==2.2.3
