@@ -1,0 +1,157 @@
+## Feature Scaling
+The continuous variables in our dataset are at varying scales.
+This poses a problem for many popular machine learning algorithms which often use Euclidian distance between data points to make the final predictions. Standardising the scale for all continuous variables can often result in an increase in performance of machine learning models.    
+
+
+
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import MaxAbsScaler
+from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import RobustScaler
+from sklearn.preprocessing import QuantileTransformer
+from sklearn.preprocessing import PowerTransformer
+from sklearn.preprocessing import Normalizer
+
+# scaler = QuantileTransformer(output_distribution='normal') 
+# scaler = PowerTransformer(method='yeo-johnson')
+scaler = StandardScaler()
+# scaler = MinMaxScaler()
+
+
+
+# Why Feature Selection?
+- Overfitting
+- Occam’s Razor: "Entities should not be multiplied without necessity."  William of Ockham
+- Garbage In Garbage out: Most of the times, we will have many non-informative features.
+
+Type of Feature Selection:
+
+- Filter based: We specify some metric and based on that filter features. An example of such a metric could be correlation/chi-square.
+- Wrapper-based: Wrapper methods consider the selection of a set of features as a search problem. Example: Recursive Feature Elimination
+- Embedded: Embedded methods use algorithms that have built-in feature selection methods. For instance, Lasso and RF have their own feature selection methods.
+
+
+
+num_feats = 20
+feature_name = data_set.columns.to_list()
+
+
+## Filter based
+Pearson correlation
+We check the absolute value of the Pearson’s correlation between the target and numerical features in our dataset. We keep the top n features based on this criterion.
+
+corr = df_final.corr()['precio'].drop('precio')
+high_corr = np.abs(corr) > 0.5
+corr_feature = high_corr.index.tolist()
+corr_support = high_corr.to_numpy()
+
+
+## Recursive Feature Elimination
+
+
+from sklearn.feature_selection import RFE
+from sklearn.linear_model import LinearRegression
+
+
+rfe_selector = RFE(estimator=LinearRegression(), n_features_to_select=num_feats, step=1, verbose=5, )
+rfe_selector.fit(data_set, target)
+rfe_support = rfe_selector.get_support()
+rfe_feature = data_set.loc[:,rfe_support].columns.tolist()
+print(str(len(rfe_feature)), 'selected features')
+
+## Embebed
+Embedded methods use algorithms that have built-in feature selection methods.
+
+### Lasso
+For example, Lasso and RF have their own feature selection methods. Lasso Regularizer forces a lot of feature weights to be zero.
+
+from sklearn.feature_selection import SelectFromModel
+from sklearn.linear_model import Lasso
+
+embeded_lr_selector = SelectFromModel(Lasso(), max_features=num_feats)
+embeded_lr_selector.fit(data_set, target)
+
+embeded_lr_support = embeded_lr_selector.get_support()
+embeded_lr_feature = data_set.loc[:,embeded_lr_support].columns.tolist()
+print(str(len(embeded_lr_feature)), 'selected features')
+
+embeded_lr_feature
+
+### RandomForest
+We can also use RandomForest to select features based on feature importance.
+
+from sklearn.feature_selection import SelectFromModel
+from sklearn.ensemble import RandomForestRegressor
+
+embeded_rf_selector = SelectFromModel(RandomForestRegressor(n_estimators=100, max_depth=10, min_samples_leaf=10), max_features=num_feats)
+embeded_rf_selector.fit(data_set, target)
+
+embeded_rf_support = embeded_rf_selector.get_support()
+embeded_rf_feature = data_set.loc[:,embeded_rf_support].columns.tolist()
+print(str(len(embeded_rf_feature)), 'selected features')
+
+from sklearn.tree import DecisionTreeRegressor
+
+embeded_rf_selector = SelectFromModel(DecisionTreeRegressor(), max_features=num_feats)
+embeded_rf_selector.fit(data_set, target)
+
+embeded_rf_support = embeded_rf_selector.get_support()
+embeded_rf_feature = data_set.loc[:,embeded_rf_support].columns.tolist()
+print(str(len(embeded_rf_feature)), 'selected features')
+
+# from sklearn.feature_selection import SelectFromModel
+from lightgbm import LGBMRegressor
+
+lgbr=LGBMRegressor(n_estimators=500, learning_rate=0.05, num_leaves=32, colsample_bytree=0.2,
+            reg_alpha=3, reg_lambda=1, min_split_gain=0.01, min_child_weight=40)
+
+embeded_lgb_selector = SelectFromModel(lgbr, max_features=num_feats)
+embeded_lgb_selector.fit(data_set, target)
+
+embeded_lgb_support = embeded_lgb_selector.get_support()
+embeded_lgb_feature = data_set.loc[:,embeded_lgb_support].columns.tolist()
+print(str(len(embeded_lgb_feature)), 'selected features')
+
+# put all selection together
+feature_selection_df = pd.DataFrame(
+    {
+        'Feature':feature_name, 
+        'Pearson':corr_support, 
+        'RFE':rfe_support, 
+        'Logistics':embeded_lr_support,
+        'Random Forest':embeded_rf_support,
+        'LightGBM':embeded_lgb_support
+    })
+# count the selected times for each feature
+feature_selection_df['Total'] = np.sum(feature_selection_df, axis=1)
+# display the top 100
+feature_selection_df = feature_selection_df.sort_values(['Total','Feature'] , ascending=False)
+feature_selection_df.index = range(1, len(feature_selection_df)+1)
+feature_selection_df.head(num_feats)
+
+from scipy import stats
+
+stats.pointbiserialr(df_final['precio'], df_final['banos_extra'])
+
+stats.pointbiserialr(df_final['precio'], df_final['banos_extra'])
+
+def cramers_v(x, y):
+    """ calculate Cramers V statistic for categorial-categorial association.
+        uses correction from Bergsma and Wicher, 
+        Journal of the Korean Statistical Society 42 (2013): 323-328
+    """
+    confusion_matrix = pd.crosstab(x,y)
+    chi2 = ss.chi2_contingency(confusion_matrix)[0]
+    n = confusion_matrix.sum().sum()
+    phi2 = chi2/n
+    r,k = confusion_matrix.shape
+    phi2corr = max(0, phi2-((k-1)*(r-1))/(n-1))
+    rcorr = r-((r-1)**2)/(n-1)
+    kcorr = k-((k-1)**2)/(n-1)
+    return np.sqrt(phi2corr/min((kcorr-1),(rcorr-1)))
+
+confusion_matrix = pd.crosstab(df_final['dormitorios'], df_final['banos'])
+confusion_matrix
+
+cramer = cramers_corrected_stat(confusion_matrix)
+cramer
