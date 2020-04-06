@@ -4,6 +4,7 @@ import logging
 from multiprocessing import cpu_count
 from multiprocessing import Pool
 import os
+from time import sleep
 
 from bs4 import BeautifulSoup
 import urllib
@@ -25,10 +26,14 @@ def retrieve_general_data(url_page):
     :Example:
 
     >>> from scraping_details import retrieve_general_data
-    >>> url_page = 'https://www.infocasas.com.uy/venta/inmuebles/montevideo/pagina3'
+    >>> url_page = (
+            'https://www.infocasas.com.uy/venta/inmuebles/montevideo/pagina3'
+            )
     >>> retrieve_general_data(url_page)
     """
+    sleep(np.random.randint(0, 3))
     logging.debug('%s', url_page)
+
     url_base = '/'.join(url_page.split('/')[:3])
     try:
         page = urllib.request.urlopen(url_page)
@@ -61,8 +66,11 @@ def retrieve_general_data(url_page):
         details = [[d.find_all('span')[0].text for d in p.find_all('div')]
                    for t in table for p in t.find_all('div')
                    if 'contentIcons' in p['class']]
-        details = pd.DataFrame(details,
-                               columns=['rooms', 'bathrooms', 'area_m2'])
+        details = pd.DataFrame(details)
+        if not details.empty:
+            details.columns = ['rooms', 'bathrooms', 'area_m2']
+        else:
+            details['rooms', 'bathrooms', 'area_m2'] = None
         data_id = [k.get('data-id', '') for k in table]
         data_idproject = [k.get('data-idproyecto', '') for k in table]
         link = [url_base + k.find('a')['href'] for k in table]
@@ -72,7 +80,7 @@ def retrieve_general_data(url_page):
 
         df = pd.DataFrame(neighborhood, columns=['neighborhood', 'type'])
         df['price'] = price
-        df['desc'] = desc
+        # df['desc'] = desc
         df['url'] = link
         df['id'] = data_id
         df['idproject'] = data_idproject
@@ -153,12 +161,15 @@ def pool_general_data(urls, outputfile):
         df_result.to_csv(outputfile, index=False)
         is_df_valid = 1
     else:
-        is_df_valid = 1
+        is_df_valid = 0
 
     return is_df_valid
 
 
-def generate_raw_dataset(url_base='https://www.infocasas.com.uy',
+def generate_raw_dataset(start,
+                         stop,
+                         step,
+                         url_base='https://www.infocasas.com.uy',
                          search_path='/venta/inmuebles/montevideo/',
                          output_file='raw_home_for_sale_dataset',
                          ):
@@ -168,22 +179,17 @@ def generate_raw_dataset(url_base='https://www.infocasas.com.uy',
     suffix = datetime.today().strftime('%Y-%m-%d')
     output_file = '{}_{}'.format(output_file, suffix)
 
-    tmp_path = os.path.join(output_path, 'details_rent/')
-    output_file_tmp = tmp_path + output_file + '_{idx}.csv'
+    tmp_path = os.path.join(output_path, 'details_raw/')
+    template_output_file = tmp_path + output_file + '_{idx}.csv'
 
     if not os.path.exists(tmp_path):
         os.mkdir(tmp_path)
 
-    is_valid_range = 1
-    idx = 0
-    while is_valid_range:
-        subset = np.arange(idx * 10, (idx+1) * 10)
-    # for idx, subset in enumerate(np.array_split(np.arange(955), 100)):
-        output_file = output_file_tmp.format(name=output_file_tmp, idx=idx)
+    for idx, subset in enumerate(np.array_split(np.arange(start, stop), step)):
+        output_file_aux = template_output_file.format(idx=idx)
         web_page = url_base + search_path + 'pagina{}'
         urls = [web_page.format(k) for k in subset]
-        is_valid_range = pool_general_data(urls, output_file)
-        idx += 1
+        pool_general_data(urls, output_file_aux)
 
     dfs = [pd.read_csv(tmp_path+key) for key in os.listdir(tmp_path)]
     output = reduce(lambda x, y: pd.concat([x, y], sort=True), dfs)
@@ -197,10 +203,11 @@ def generate_raw_datails_dataset():
 
 
 if __name__ == '__main__':
+    # rr = retrieve_general_data('https://www.infocasas.com.uy/venta/inmuebles/montevideo/pagina1')
 
     basepath = '/home/cesar/software/houses-project/data/raw/'
-    input_file = 'raw_home_for_sale_dataset_2019-07-25.csv'
-    output_file_base = 'raw_details_home_for_sale_dataset_2019-07-25'
+    input_file = 'raw_home_for_sale_dataset_2019-09-20.csv'
+    output_file_base = 'raw_details_home_for_sale_dataset_2019-09-20'
     tmp_path = basepath + 'details_raw/'
 
     csv_path = basepath + input_file
@@ -210,7 +217,7 @@ if __name__ == '__main__':
         os.mkdir(tmp_path)
 
     df = pd.read_csv(csv_path)
-    
+
     for idx, subset in enumerate(np.array_split(df.index.values, 100)):
         output_file = output_file_tmp.format(name=output_file_base, idx=idx)
         pool_property_details(df.loc[subset, 'url'].values, output_file)

@@ -45,7 +45,7 @@ def clean_dataset(src_file, dst_file):
     df_clean.loc[:, 'dormitorios'] = rooms
     df_clean.loc[:, 'dormitorios_extra'] = df.loc[:, 'dormitorios'].str.match('(\d\+)')
 
-    floor = df.loc[:, 'piso'].str.extract(("[0-9]+)\.?"))[0]
+    floor = df.loc[:, 'piso'].str.extract(("([0-9]+)\.?"))[0]
     floor_mask = df.loc[:, 'piso'].str.lower().str.match('planta baja')
     floor[floor_mask] = '0'
     df_clean.loc[:, 'piso'] = floor
@@ -73,7 +73,7 @@ def clean_dataset(src_file, dst_file):
     df_clean.loc[:, to_numeric] = df_to_numeric.astype(float)
 
     sorted_col = df_clean.columns.sort_values()
-    df_clean[sorted_col].to_csv(output_file, index=False)
+    df_clean[sorted_col].to_csv(dst_file, index=False)
     cat_trans = (df
                  .drop(columns=['url', 'referencia'])
                  .select_dtypes(include='O')
@@ -87,7 +87,7 @@ def clean_dataset(src_file, dst_file):
 
 
 if __name__ == '__main__':
-    scr_file = '../data/raw/raw_details_home_for_sale_dataset_2019-07-25.csv'
-    dst_file = '../data/preprocessed/details_home_for_sale_dataset_2019-07-25.csv'
+    scr_file = '../data/raw/raw_details_home_for_sale_dataset_2019-09-20.csv'
+    dst_file = '../data/preprocessed/details_home_for_sale_dataset_2019-09-20.csv'
 
     clean_dataset(scr_file, dst_file)

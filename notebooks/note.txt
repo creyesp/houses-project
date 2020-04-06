@@ -1,1 +1,5 @@
 https://github.com/WillKoehrsen/Machine-Learning-Projects/blob/master/random_forest_explained/Improving%20Random%20Forest%20Part%202.ipynb
+
+https://medium.com/limitedio/data-cleaning-the-secret-ingredient-to-the-success-of-any-data-science-project-e42d5e0df05a
+
+https://docs.microsoft.com/en-us/azure/machine-learning/team-data-science-process/overview
